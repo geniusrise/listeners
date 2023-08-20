@@ -14,45 +14,62 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import threading
-
-from flask import Flask, request
+from typing import List
+import cherrypy
 from geniusrise import Spout, StreamingOutput, State
 
 
 class Webhook(Spout):
-    def __init__(self, output_config: StreamingOutput, state_manager: State, endpoint: str, port: int = 3000):
-        super().__init__(output_config, state_manager)
-        self.app = Flask(__name__)
-        self.endpoint = endpoint
-        self.port = port
+    def __init__(self, output: StreamingOutput, state: State, **kwargs):
+        super().__init__(output, state)
+        self.top_level_arguments = kwargs  # this literally contains argparse's parsed dict
+        self.buffer: List[dict] = []
 
-        @self.app.route(self.endpoint, methods=["GET", "POST", "PUT", "DELETE"])
-        def handle_webhook():
-            try:
-                data = request.get_json()
+    @cherrypy.expose
+    @cherrypy.tools.json_in()
+    def default(self, *args, **kwargs):
+        try:
+            data = cherrypy.request.json
 
-                # Use the output_config's save method
-                self.output_config.save(data)
+            # Add additional data about the endpoint and headers
+            enriched_data = {
+                "original_data": data,
+                "endpoint": cherrypy.url(),
+                "headers": dict(cherrypy.request.headers),
+            }
 
-                # Update the state using the state_manager
-                current_state = self.state_manager.get_state(self.id) or {"success_count": 0, "failure_count": 0}
-                current_state["success_count"] += 1
-                self.state_manager.set_state(self.id, current_state)
+            # Use the output's save method
+            self.output.save(enriched_data)
 
-                return "", 200
-            except Exception as e:
-                self.log.error(f"Error processing webhook data: {e}")
+            # Update the state using the state
+            current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
+            if "success_count" not in current_state.keys():
+                current_state = {"success_count": 0, "failure_count": 0}
+            current_state["success_count"] += 1
+            self.state.set_state(self.id, current_state)
 
-                # Update the state using the state_manager
-                current_state = self.state_manager.get_state(self.id) or {"success_count": 0, "failure_count": 0}
-                current_state["failure_count"] += 1
-                self.state_manager.set_state(self.id, current_state)
+            return ""
+        except Exception as e:
+            self.log.error(f"Error processing webhook data: {e}")
 
-                return "Error processing data", 500
+            # Update the state using the state
+            current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
+            current_state["failure_count"] += 1
+            self.state.set_state(self.id, current_state)
 
-    def listen(self):
+            cherrypy.response.status = 500
+            return "Error processing data"
+
+    def listen(self, endpoint: str = "*", port: int = 3000):
         """
         Start listening for data from the webhook.
         """
-        threading.Thread(target=self.app.run, kwargs={"host": "0.0.0.0", "port": self.port}).start()
+        cherrypy.config.update(
+            {
+                "server.socket_host": "0.0.0.0",
+                "server.socket_port": port,
+            }
+        )
+        cherrypy.tree.mount(self, "/")
+        cherrypy.engine.start()
+        cherrypy.engine.block()
