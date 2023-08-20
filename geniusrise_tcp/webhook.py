@@ -33,7 +33,7 @@ class Webhook(Spout):
 
             # Add additional data about the endpoint and headers
             enriched_data = {
-                "original_data": data,
+                "data": data,
                 "endpoint": cherrypy.url(),
                 "headers": dict(cherrypy.request.headers),
             }

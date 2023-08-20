@@ -15,33 +15,25 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import asyncio
-
 import websockets
 from geniusrise import Spout, StreamingOutput, State
 
 
-class WebSocket(Spout):
-    def __init__(
-        self,
-        output: StreamingOutput,
-        state: State,
-        host: str = "localhost",
-        port: int = 8765,
-    ):
+class Websocket(Spout):
+    def __init__(self, output: StreamingOutput, state: State, **kwargs):
         super().__init__(output, state)
-        self.host = host
-        self.port = port
+        self.top_level_arguments = kwargs
 
-    async def __listen(self):
+    async def __listen(self, host: str, port: int):
         """
         Start listening for data from the WebSocket server.
         """
-        async with websockets.serve(self.receive_message, self.host, self.port):
+        async with websockets.serve(self.receive_message, host, port):  # type: ignore
             await asyncio.Future()  # run forever
 
     async def receive_message(self, websocket, path):
         """
-        Receive a message from a WebSocket client and save it.
+        Receive a message from a WebSocket client and save it along with metadata.
 
         :param websocket: WebSocket client connection.
         :param path: WebSocket path.
@@ -49,8 +41,15 @@ class WebSocket(Spout):
         try:
             data = await websocket.recv()
 
+            # Add additional metadata
+            enriched_data = {
+                "data": data,
+                "path": path,
+                "client_address": websocket.remote_address,
+            }
+
             # Use the output's save method
-            self.output.save(data)
+            self.output.save(enriched_data)
 
             # Update the state using the state
             current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
@@ -64,8 +63,8 @@ class WebSocket(Spout):
             current_state["failure_count"] += 1
             self.state.set_state(self.id, current_state)
 
-    def listen(self):
+    def listen(self, host: str = "localhost", port: int = 8765):
         """
         Start the WebSocket server.
         """
-        asyncio.run(self.__listen())
+        asyncio.run(self.__listen(host, port))
