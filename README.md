@@ -1,6 +1,22 @@
-# Generic Streaming Spouts
-
 ![banner](./assets/banner.jpg)
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+**Table of Contents**
+
+- [Generic Streaming Spouts](#generic-streaming-spouts)
+  - [Usage](#usage)
+    - [Webhooks](#webhooks)
+    - [Kafka](#kafka)
+    - [Websockets](#websockets)
+    - [UDP](#udp)
+    - [QUIC](#quic)
+    - [REST API polling](#rest-api-polling)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+# Generic Streaming Spouts
 
 This is a collection of generic Spouts and (micro) Batch spouts.
 
