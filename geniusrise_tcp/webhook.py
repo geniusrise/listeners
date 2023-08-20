@@ -64,10 +64,19 @@ class Webhook(Spout):
         """
         Start listening for data from the webhook.
         """
+        # Disable CherryPy's default loggers
+        cherrypy.log.access_log.propagate = False
+        cherrypy.log.error_log.propagate = False
+
+        # Set CherryPy's error and access loggers to use your logger
+        cherrypy.log.error_log.addHandler(self.log)
+        cherrypy.log.access_log.addHandler(self.log)
+
         cherrypy.config.update(
             {
                 "server.socket_host": "0.0.0.0",
                 "server.socket_port": port,
+                "log.screen": False,  # Disable logging to the console
             }
         )
         cherrypy.tree.mount(self, "/")
