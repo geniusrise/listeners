@@ -29,11 +29,11 @@ class Quic(Spout):
         self,
         cert_path: str,
         key_path: str,
-        output_config: StreamingOutput,
-        state_manager: State,
+        output: StreamingOutput,
+        state: State,
         port: int = 4433,
     ):
-        super().__init__(output_config, state_manager)
+        super().__init__(output, state)
         self.port = port
         self.cert_path = cert_path
         self.key_path = key_path
@@ -48,20 +48,20 @@ class Quic(Spout):
         try:
             data = json.loads(data.decode())
 
-            # Use the output_config's save method
-            self.output_config.save(data)
+            # Use the output's save method
+            self.output.save(data)
 
-            # Update the state using the state_manager
-            current_state = self.state_manager.get_state(self.id) or {"success_count": 0, "failure_count": 0}
+            # Update the state using the state
+            current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
             current_state["success_count"] += 1
-            self.state_manager.set_state(self.id, current_state)
+            self.state.set_state(self.id, current_state)
         except Exception as e:
             self.log.error(f"Error processing stream data: {e}")
 
-            # Update the state using the state_manager
-            current_state = self.state_manager.get_state(self.id) or {"success_count": 0, "failure_count": 0}
+            # Update the state using the state
+            current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
             current_state["failure_count"] += 1
-            self.state_manager.set_state(self.id, current_state)
+            self.state.set_state(self.id, current_state)
 
     async def handle_quic_event(self, event):
         """

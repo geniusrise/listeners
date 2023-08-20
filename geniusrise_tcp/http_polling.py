@@ -24,14 +24,14 @@ from geniusrise import Spout, StreamingOutput, State
 class RESTAPIPoll(Spout):
     def __init__(
         self,
-        output_config: StreamingOutput,
-        state_manager: State,
+        output: StreamingOutput,
+        state: State,
         url: str,
         method: str,
         interval: int = 60,
         body=None,
     ):
-        super().__init__(output_config, state_manager)
+        super().__init__(output, state)
         self.url = url
         self.method = method
         self.interval = interval
@@ -47,19 +47,19 @@ class RESTAPIPoll(Spout):
                 response.raise_for_status()
                 data = response.json()
 
-                # Use the output_config's save method
-                self.output_config.save(data)
+                # Use the output's save method
+                self.output.save(data)
 
-                # Update the state using the state_manager
-                current_state = self.state_manager.get_state(self.id) or {"success_count": 0, "failure_count": 0}
+                # Update the state using the state
+                current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
                 current_state["success_count"] += 1
-                self.state_manager.set_state(self.id, current_state)
+                self.state.set_state(self.id, current_state)
             except Exception as e:
                 self.log.error(f"Error fetching data from REST API: {e}")
 
-                # Update the state using the state_manager
-                current_state = self.state_manager.get_state(self.id) or {"success_count": 0, "failure_count": 0}
+                # Update the state using the state
+                current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
                 current_state["failure_count"] += 1
-                self.state_manager.set_state(self.id, current_state)
+                self.state.set_state(self.id, current_state)
 
             time.sleep(self.interval)
