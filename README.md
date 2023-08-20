@@ -156,7 +156,11 @@ genius Quic rise \
   --postgres_database geniusrise \
   --postgres_table state \
   listen \
-  --args cert_path=/home/ixaxaar/.ssh/quic_cert.pem key_path=/home/ixaxaar/.ssh/quic_key.pem host=localhost port=3004
+  --args \
+    cert_path=/home/ixaxaar/.ssh/quic_cert.pem \
+    key_path=/home/ixaxaar/.ssh/quic_key.pem \
+    host=localhost \
+    port=3004
 ```
 
 Test:
@@ -182,5 +186,11 @@ genius RESTAPIPoll rise \
   --postgres_database geniusrise \
   --postgres_table state \
   listen \
-  --args url=https://reqres.in/api/users method=GET interval=6 body="" headers='{"content-type": "application/json"}' params='{"page": 2}'
+  --args \
+    url=https://reqres.in/api/users \
+    method=GET \
+    interval=6 \
+    body="" \
+    headers='{"content-type": "application/json"}' \
+    params='{"page": 2}'
 ```
