@@ -14,29 +14,29 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 import asyncio
 import json
-
-from aioquic.asyncio.protocol import QuicConnectionProtocol
-from aioquic.asyncio.server import serve
-from aioquic.quic.configuration import QuicConfiguration
+from aioquic.asyncio import serve, QuicConnectionProtocol
 from aioquic.quic.events import StreamDataReceived
+from aioquic.quic.configuration import QuicConfiguration
 from geniusrise import Spout, StreamingOutput, State
 
 
+class GeniusQuicProtocol(QuicConnectionProtocol):
+    def __init__(self, *args, handler, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.handler = handler
+
+    def quic_event_received(self, event):
+        if isinstance(event, StreamDataReceived):
+            asyncio.create_task(self.handler(event.data, event.stream_id))
+
+
 class Quic(Spout):
-    def __init__(
-        self,
-        cert_path: str,
-        key_path: str,
-        output: StreamingOutput,
-        state: State,
-        port: int = 4433,
-    ):
+    def __init__(self, output: StreamingOutput, state: State, **kwargs):
         super().__init__(output, state)
-        self.port = port
-        self.cert_path = cert_path
-        self.key_path = key_path
+        self.top_level_arguments = kwargs
 
     async def handle_stream_data(self, data: bytes, stream_id: int):
         """
@@ -48,8 +48,14 @@ class Quic(Spout):
         try:
             data = json.loads(data.decode())
 
+            # Add additional data about the stream ID
+            enriched_data = {
+                "data": data,
+                "stream_id": stream_id,
+            }
+
             # Use the output's save method
-            self.output.save(data)
+            self.output.save(enriched_data)
 
             # Update the state using the state
             current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
@@ -63,30 +69,22 @@ class Quic(Spout):
             current_state["failure_count"] += 1
             self.state.set_state(self.id, current_state)
 
-    async def handle_quic_event(self, event):
-        """
-        Handle a QUIC protocol event.
-
-        :param event: The event to handle.
-        """
-        if isinstance(event, StreamDataReceived):
-            await self.handle_stream_data(event.data, event.stream_id)
-
-    def listen(self):
+    def listen(self, cert_path: str, key_path: str, host: str = "localhost", port: int = 4433):
         """
         Start listening for data from the QUIC server.
         """
         configuration = QuicConfiguration(is_client=False)
-        configuration.load_cert_chain(self.cert_path, self.key_path)
+        configuration.load_cert_chain(cert_path, key_path)
 
         loop = asyncio.get_event_loop()
         server = loop.run_until_complete(
             serve(
-                self.port,
+                host=host,
+                port=port,
                 configuration=configuration,
-                create_protocol=QuicConnectionProtocol,
-                protocol_factory=self.handle_quic_event,
-                loop=loop,
+                create_protocol=lambda *args, **kwargs: GeniusQuicProtocol(
+                    *args, handler=self.handle_stream_data, **kwargs
+                ),
             )
         )
 
