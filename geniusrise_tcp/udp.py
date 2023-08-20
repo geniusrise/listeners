@@ -15,34 +15,33 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import socket
-
 from geniusrise import Spout, StreamingOutput, State
 
 
 class Udp(Spout):
-    def __init__(
-        self,
-        output: StreamingOutput,
-        state: State,
-        host: str = "localhost",
-        port: int = 12345,
-    ):
+    def __init__(self, output: StreamingOutput, state: State, **kwargs):
         super().__init__(output, state)
-        self.host = host
-        self.port = port
+        self.top_level_arguments = kwargs
 
-    def listen(self):
+    def listen(self, host: str = "localhost", port: int = 12345):
         """
         Start listening for data from the UDP server.
         """
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.bind((self.host, self.port))
+            s.bind((host, port))
             while True:
                 try:
                     data, addr = s.recvfrom(1024)
 
+                    # Enrich the data with metadata about the sender's address and port
+                    enriched_data = {
+                        "data": data.decode("utf-8"),  # Assuming the data is a utf-8 encoded string
+                        "sender_address": addr[0],
+                        "sender_port": addr[1],
+                    }
+
                     # Use the output's save method
-                    self.output.save(data)
+                    self.output.save(enriched_data)
 
                     # Update the state using the state
                     current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
