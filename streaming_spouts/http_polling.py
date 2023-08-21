@@ -15,12 +15,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 import requests
+from geniusrise import Spout, State, StreamingOutput
 from requests.exceptions import HTTPError, RequestException
-
-from geniusrise import Spout, StreamingOutput, State
 
 
 class RESTAPIPoll(Spout):
@@ -51,13 +50,22 @@ class RESTAPIPoll(Spout):
             data = response.json()
 
             # Add additional data about the request
-            enriched_data = {"data": data, "url": url, "method": method, "headers": headers, "params": params}
+            enriched_data = {
+                "data": data,
+                "url": url,
+                "method": method,
+                "headers": headers,
+                "params": params,
+            }
 
             # Use the output's save method
             self.output.save(enriched_data)
 
             # Update the state using the state
-            current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
+            current_state = self.state.get_state(self.id) or {
+                "success_count": 0,
+                "failure_count": 0,
+            }
             current_state["success_count"] += 1
             self.state.set_state(self.id, current_state)
         except HTTPError:
@@ -70,7 +78,10 @@ class RESTAPIPoll(Spout):
             self.log.error(f"Unexpected error: {e}")
 
             # Update the state using the state
-            current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
+            current_state = self.state.get_state(self.id) or {
+                "success_count": 0,
+                "failure_count": 0,
+            }
             current_state["failure_count"] += 1
             self.state.set_state(self.id, current_state)
 

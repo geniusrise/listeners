@@ -17,10 +17,11 @@
 
 import asyncio
 import json
-from aioquic.asyncio import serve, QuicConnectionProtocol
-from aioquic.quic.events import StreamDataReceived
+
+from aioquic.asyncio import QuicConnectionProtocol, serve
 from aioquic.quic.configuration import QuicConfiguration
-from geniusrise import Spout, StreamingOutput, State
+from aioquic.quic.events import StreamDataReceived
+from geniusrise import Spout, State, StreamingOutput
 
 
 class GeniusQuicProtocol(QuicConnectionProtocol):
@@ -58,14 +59,20 @@ class Quic(Spout):
             self.output.save(enriched_data)
 
             # Update the state using the state
-            current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
+            current_state = self.state.get_state(self.id) or {
+                "success_count": 0,
+                "failure_count": 0,
+            }
             current_state["success_count"] += 1
             self.state.set_state(self.id, current_state)
         except Exception as e:
             self.log.error(f"Error processing stream data: {e}")
 
             # Update the state using the state
-            current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
+            current_state = self.state.get_state(self.id) or {
+                "success_count": 0,
+                "failure_count": 0,
+            }
             current_state["failure_count"] += 1
             self.state.set_state(self.id, current_state)
 

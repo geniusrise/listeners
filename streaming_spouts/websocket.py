@@ -15,8 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import asyncio
+
 import websockets
-from geniusrise import Spout, StreamingOutput, State
+from geniusrise import Spout, State, StreamingOutput
 
 
 class Websocket(Spout):
@@ -52,14 +53,20 @@ class Websocket(Spout):
             self.output.save(enriched_data)
 
             # Update the state using the state
-            current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
+            current_state = self.state.get_state(self.id) or {
+                "success_count": 0,
+                "failure_count": 0,
+            }
             current_state["success_count"] += 1
             self.state.set_state(self.id, current_state)
         except Exception as e:
             self.log.error(f"Error processing WebSocket data: {e}")
 
             # Update the state using the state
-            current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
+            current_state = self.state.get_state(self.id) or {
+                "success_count": 0,
+                "failure_count": 0,
+            }
             current_state["failure_count"] += 1
             self.state.set_state(self.id, current_state)
 

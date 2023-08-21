@@ -15,8 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from typing import List
+
 import cherrypy
-from geniusrise import Spout, StreamingOutput, State
+from geniusrise import Spout, State, StreamingOutput
 
 
 class Webhook(Spout):
@@ -42,7 +43,10 @@ class Webhook(Spout):
             self.output.save(enriched_data)
 
             # Update the state using the state
-            current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
+            current_state = self.state.get_state(self.id) or {
+                "success_count": 0,
+                "failure_count": 0,
+            }
             if "success_count" not in current_state.keys():
                 current_state = {"success_count": 0, "failure_count": 0}
             current_state["success_count"] += 1
@@ -53,7 +57,10 @@ class Webhook(Spout):
             self.log.error(f"Error processing webhook data: {e}")
 
             # Update the state using the state
-            current_state = self.state.get_state(self.id) or {"success_count": 0, "failure_count": 0}
+            current_state = self.state.get_state(self.id) or {
+                "success_count": 0,
+                "failure_count": 0,
+            }
             current_state["failure_count"] += 1
             self.state.set_state(self.id, current_state)
 
