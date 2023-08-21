@@ -14,7 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from typing import List
+import base64
+from typing import List, Optional
 
 import cherrypy
 from geniusrise import Spout, State, StreamingOutput
@@ -23,12 +24,24 @@ from geniusrise import Spout, State, StreamingOutput
 class Webhook(Spout):
     def __init__(self, output: StreamingOutput, state: State, **kwargs):
         super().__init__(output, state)
-        self.top_level_arguments = kwargs  # this literally contains argparse's parsed dict
         self.buffer: List[dict] = []
+
+    def _check_auth(self, username, password):
+        auth_header = cherrypy.request.headers.get("Authorization")
+        if auth_header:
+            auth_decoded = base64.b64decode(auth_header[6:]).decode("utf-8")
+            provided_username, provided_password = auth_decoded.split(":", 1)
+            if provided_username != username or provided_password != password:
+                raise cherrypy.HTTPError(401, "Unauthorized")
+        else:
+            raise cherrypy.HTTPError(401, "Unauthorized")
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
-    def default(self, *args, **kwargs):
+    def default(self, username=None, password=None):
+        if username and password:
+            self._check_auth(username, password)
+
         try:
             data = cherrypy.request.json
 
@@ -67,7 +80,9 @@ class Webhook(Spout):
             cherrypy.response.status = 500
             return "Error processing data"
 
-    def listen(self, endpoint: str = "*", port: int = 3000):
+    def listen(
+        self, endpoint: str = "*", port: int = 3000, username: Optional[str] = None, password: Optional[str] = None
+    ):
         """
         Start listening for data from the webhook.
         """

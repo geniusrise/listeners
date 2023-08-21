@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
+from typing import Optional
 
 from confluent_kafka import Consumer, KafkaError
 from geniusrise import Spout, State, StreamingOutput
@@ -25,17 +26,32 @@ class Kafka(Spout):
         super().__init__(output, state)
         self.top_level_arguments = kwargs
 
-    def listen(self, topic: str, group_id: str, bootstrap_servers: str = "localhost:9092"):
+    def listen(
+        self,
+        topic: str,
+        group_id: str,
+        bootstrap_servers: str = "localhost:9092",
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+    ):
         """
         Start listening for data from the Kafka topic.
         """
-        consumer = Consumer(
-            {
-                "bootstrap.servers": bootstrap_servers,
-                "group.id": group_id,
-                "auto.offset.reset": "earliest",
-            }
-        )
+        config = {
+            "bootstrap.servers": bootstrap_servers,
+            "group.id": group_id,
+            "auto.offset.reset": "earliest",
+        }
+        if username and password:
+            config.update(
+                {
+                    "security.protocol": "SASL_PLAINTEXT",
+                    "sasl.mechanisms": "PLAIN",
+                    "sasl.username": username,
+                    "sasl.password": password,
+                }
+            )
+        consumer = Consumer(config)
 
         consumer.subscribe([topic])
 
