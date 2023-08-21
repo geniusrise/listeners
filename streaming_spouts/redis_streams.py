@@ -16,6 +16,7 @@
 
 import asyncio
 from typing import Optional
+
 import redis
 from geniusrise import Spout, State, StreamingOutput
 
@@ -26,7 +27,12 @@ class RedisStream(Spout):
         self.top_level_arguments = kwargs
 
     async def _listen(
-        self, stream_key: str, host: str = "localhost", port: int = 6379, db: int = 0, password: Optional[str] = None
+        self,
+        stream_key: str,
+        host: str = "localhost",
+        port: int = 6379,
+        db: int = 0,
+        password: Optional[str] = None,
     ):
         """
         Start listening for data from the Redis stream.
@@ -79,7 +85,14 @@ class RedisStream(Spout):
             current_state["failure_count"] += 1
             self.state.set_state(self.id, current_state)
 
-    def listen(self, stream_key: str, host: str = "localhost", port: int = 6379, db=0, password: Optional[str] = None):
+    def listen(
+        self,
+        stream_key: str,
+        host: str = "localhost",
+        port: int = 6379,
+        db=0,
+        password: Optional[str] = None,
+    ):
         """
         Start the asyncio event loop to listen for data from the Redis stream.
         """

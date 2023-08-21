@@ -27,7 +27,12 @@ class RedisPubSub(Spout):
         self.top_level_arguments = kwargs
 
     def listen(
-        self, channel: str, host: str = "localhost", port: int = 6379, db: int = 0, password: Optional[str] = None
+        self,
+        channel: str,
+        host: str = "localhost",
+        port: int = 6379,
+        db: int = 0,
+        password: Optional[str] = None,
     ):
         """
         Start listening for data from the Redis Pub/Sub channel.

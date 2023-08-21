@@ -67,7 +67,11 @@ class RabbitMQ(Spout):
             self.state.set_state(self.id, current_state)
 
     def listen(
-        self, queue_name: str, host: str = "localhost", username: Optional[str] = None, password: Optional[str] = None
+        self,
+        queue_name: str,
+        host: str = "localhost",
+        username: Optional[str] = None,
+        password: Optional[str] = None,
     ):
         """
         Start listening for data from the RabbitMQ server.

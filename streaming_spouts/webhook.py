@@ -81,7 +81,11 @@ class Webhook(Spout):
             return "Error processing data"
 
     def listen(
-        self, endpoint: str = "*", port: int = 3000, username: Optional[str] = None, password: Optional[str] = None
+        self,
+        endpoint: str = "*",
+        port: int = 3000,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
     ):
         """
         Start listening for data from the webhook.

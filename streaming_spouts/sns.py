@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import asyncio
+
 import boto3
 from botocore.exceptions import ClientError
 from geniusrise import Spout, State, StreamingOutput
