@@ -286,7 +286,13 @@ genius RedisPubSub rise \
   --postgres_database geniusrise \
   --postgres_table state \
   listen \
-  --args channel=my_channel host=geniusrise_test port=6379
+  --args channel=geniusrise_test host=localhost port=6380
+```
+
+Test:
+
+```bash
+redis-cli PUBLISH geniusrise_test '{"test": "redis pubsub message"}'
 ```
 
 ### Redis Streams

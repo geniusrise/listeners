@@ -41,12 +41,10 @@ class RedisPubSub(Spout):
         pubsub = self.redis.pubsub()
         pubsub.subscribe(channel)
 
-        self.log.info(
-            f"Listening to channel {channel} on Redis server at {self.top_level_arguments['host']}:{self.top_level_arguments['port']}"
-        )
+        self.log.info(f"Listening to channel {channel} on Redis server at {host}:{port}")
 
-        try:
-            for message in pubsub.listen():
+        for message in pubsub.listen():
+            try:
                 if message["type"] == "message":
                     data = json.loads(message["data"])
 
@@ -66,13 +64,13 @@ class RedisPubSub(Spout):
                     }
                     current_state["success_count"] += 1
                     self.state.set_state(self.id, current_state)
-        except Exception as e:
-            self.log.error(f"Error processing Redis Pub/Sub message: {e}")
+            except Exception as e:
+                self.log.error(f"Error processing Redis Pub/Sub message: {e}")
 
-            # Update the state using the state
-            current_state = self.state.get_state(self.id) or {
-                "success_count": 0,
-                "failure_count": 0,
-            }
-            current_state["failure_count"] += 1
-            self.state.set_state(self.id, current_state)
+                # Update the state using the state
+                current_state = self.state.get_state(self.id) or {
+                    "success_count": 0,
+                    "failure_count": 0,
+                }
+                current_state["failure_count"] += 1
+                self.state.set_state(self.id, current_state)
