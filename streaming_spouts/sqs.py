@@ -23,22 +23,22 @@ class SQS(Spout):
         super().__init__(output, state)
         self.top_level_arguments = kwargs
         self.sqs = boto3.client("sqs")
-        self.queue_url = self.top_level_arguments.get("queue_url")
 
-    def listen(self):
+    def listen(self, queue_url: str, batch_size: int = 10, batch_interval: int = 10):
         """
         Start listening for new messages in the SQS queue.
         """
+        self.queue_url = queue_url
         while True:
             try:
                 # Receive message from SQS queue
                 response = self.sqs.receive_message(
                     QueueUrl=self.queue_url,
                     AttributeNames=["All"],
-                    MaxNumberOfMessages=10,  # Fetch up to 10 messages
+                    MaxNumberOfMessages=batch_size,
                     MessageAttributeNames=["All"],
-                    VisibilityTimeout=0,
-                    WaitTimeSeconds=0,
+                    VisibilityTimeout=batch_interval,
+                    WaitTimeSeconds=batch_interval,
                 )
 
                 if "Messages" in response:
@@ -65,7 +65,7 @@ class SQS(Spout):
                         # Delete received message from queue
                         self.sqs.delete_message(QueueUrl=self.queue_url, ReceiptHandle=receipt_handle)
                 else:
-                    self.log.info("No messages available in the queue.")
+                    self.log.debug("No messages available in the queue.")
             except Exception as e:
                 self.log.error(f"Error processing SQS message: {e}")
 

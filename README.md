@@ -341,3 +341,9 @@ genius SQS rise \
   listen \
   --args queue_url=https://sqs.ap-south-1.amazonaws.com/866011655254/geniusrise_test
 ```
+
+Test:
+
+```bash
+aws sqs send-message --queue-url https://sqs.ap-south-1.amazonaws.com/866011655254/geniusrise_test --message-body '{"test": "sqs message"}'
+```

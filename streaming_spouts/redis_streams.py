@@ -17,7 +17,7 @@
 import asyncio
 from typing import Optional
 
-import redis
+import redis  # type: ignore
 from geniusrise import Spout, State, StreamingOutput
 
 
@@ -47,7 +47,7 @@ class RedisStream(Spout):
             while True:
                 # Use run_in_executor to run the synchronous redis call in a separate thread
                 result = await asyncio.get_event_loop().run_in_executor(
-                    None, self.redis.xread, {stream_key: last_id}, count=10, block=1000
+                    None, self.redis.xread, {stream_key: last_id, "count": 10, "block": 1000}
                 )
 
                 for _, messages in result:

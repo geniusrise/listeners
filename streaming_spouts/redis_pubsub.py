@@ -17,7 +17,7 @@
 import json
 from typing import Optional
 
-import redis
+import redis  # type: ignore
 from geniusrise import Spout, State, StreamingOutput
 
 
