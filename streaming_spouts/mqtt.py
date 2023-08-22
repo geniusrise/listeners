@@ -35,8 +35,8 @@ class MQTT(Spout):
         :param flags: Response flags sent by the broker.
         :param rc: Connection result.
         """
-        self.log.info(f"Connected with result code {rc}")
-        client.subscribe(self.top_level_arguments["topic"])
+        self.log.debug(f"Connected with result code {rc}")
+        client.subscribe(self.topic)
 
     def _on_message(self, client, userdata, msg):
         """
@@ -87,6 +87,7 @@ class MQTT(Spout):
         """
         Start listening for data from the MQTT broker.
         """
+        self.topic = topic
         try:
             self.log.info("Starting MQTT listener...")
             client = mqtt.Client()
@@ -106,3 +107,4 @@ class MQTT(Spout):
             }
             current_state["failure_count"] += 1
             self.state.set_state(self.id, current_state)
+            raise

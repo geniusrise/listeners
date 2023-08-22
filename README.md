@@ -268,7 +268,17 @@ genius MQTT rise \
   --postgres_database geniusrise \
   --postgres_table state \
   listen \
-  --args host=localhost port=1883 topic=my_topic
+  --args host=localhost port=1883 topic=geniusrise_test
+```
+
+```bash
+snap install mqtt-explorer # GUI, create a topic, send a message
+```
+
+or
+
+```bash
+docker exec -it streaming-spouts-mosquitto-1 mosquitto_pub -h 127.0.0.1 -t "geniusrise_test" -m '{"test": "mqtt message"}'
 ```
 
 ### Redis Pub-Sub
