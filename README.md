@@ -250,7 +250,13 @@ genius RabbitMQ rise \
   --postgres_database geniusrise \
   --postgres_table state \
   listen \
-  --args queue_name=geniusrise_test host=localhost
+  --args queue_name=geniusrise_test host=localhost username=admin password=admin
+```
+
+Test:
+
+```bash
+Go to http://localhost:15672/#/queues/%2F/geniusrise_test
 ```
 
 ### MQTT

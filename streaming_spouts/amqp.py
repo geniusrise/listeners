@@ -79,9 +79,13 @@ class RabbitMQ(Spout):
         try:
             self.log.info("Starting RabbitMQ listener...")
             credentials = pika.PlainCredentials(username, password) if username and password else None
-            connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, credentials=credentials))
+            connection = (
+                pika.BlockingConnection(pika.ConnectionParameters(host=host, credentials=credentials))
+                if credentials
+                else pika.BlockingConnection(pika.ConnectionParameters(host=host))
+            )
             channel = connection.channel()
-            channel.queue_declare(queue=queue_name)
+            channel.queue_declare(queue=queue_name, durable=True)
             channel.basic_consume(queue=queue_name, on_message_callback=self._callback, auto_ack=True)
             self.log.info("Waiting for messages. To exit press CTRL+C")
             channel.start_consuming()
