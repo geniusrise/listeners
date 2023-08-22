@@ -324,6 +324,13 @@ genius SNS rise \
   listen
 ```
 
+Test:
+
+```bash
+aws sns create-topic --name geniusrise_test
+aws sns publish --topic-arn arn:aws:sns:ap-south-1:866011655254:geniusrise_test --message '{"test": "sns message"}'
+```
+
 ### AWS SQS
 
 ```bash

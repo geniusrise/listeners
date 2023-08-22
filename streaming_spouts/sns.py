@@ -90,3 +90,4 @@ class SNS(Spout):
         """
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self._listen())
+        self.log.info("Exiting...")
