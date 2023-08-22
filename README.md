@@ -304,7 +304,13 @@ genius RedisStream rise \
   --postgres_database geniusrise \
   --postgres_table state \
   listen \
-  --args stream_key=geniusrise_test redis_host=localhost
+  --args stream_key=geniusrise_test host=localhost
+```
+
+Test:
+
+```bash
+redis-cli XADD geniusrise_test * test "redis stream message"
 ```
 
 ### AWS SNS

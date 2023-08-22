@@ -33,44 +33,62 @@ class RedisStream(Spout):
         port: int = 6379,
         db: int = 0,
         password: Optional[str] = None,
+        last_id: Optional[str] = None,
     ):
         """
         Start listening for data from the Redis stream.
         """
-        redis_host = self.top_level_arguments.get("redis_host", "localhost")
         try:
-            self.log.info(f"Starting to listen to Redis stream {stream_key} on host {redis_host}")
+            self.log.info(f"Starting to listen to Redis stream {stream_key} on host {host}")
 
             self.redis = redis.StrictRedis(host=host, port=port, password=password, decode_responses=True, db=db)
-            last_id = "0"  # Start reading from the beginning of the stream
+            current_state = self.state.get_state(self.id) or {
+                "success_count": 0,
+                "failure_count": 0,
+                "last_id": last_id,
+            }
+            last_id = (
+                current_state["last_id"]
+                if "last_id" in current_state and last_id is None and current_state["last_id"] is not None
+                else "0"
+                if last_id is None
+                else last_id
+            )
 
             while True:
-                # Use run_in_executor to run the synchronous redis call in a separate thread
-                result = await asyncio.get_event_loop().run_in_executor(
-                    None, self.redis.xread, {stream_key: last_id, "count": 10, "block": 1000}
-                )
+                try:
+                    # Use run_in_executor to run the synchronous redis call in a separate thread
+                    result = await asyncio.get_event_loop().run_in_executor(
+                        None, self.redis.xread, {stream_key: last_id, "count": 10, "block": 1000}
+                    )
 
-                for _, messages in result:
-                    for msg_id, fields in messages:
-                        data = {k.decode(): v.decode() for k, v in fields.items()}
+                    for _, messages in result:
+                        for msg_id, fields in messages:
+                            last_id = msg_id
 
-                        # Enrich the data with metadata about the stream key and message ID
-                        enriched_data = {
-                            "data": data,
-                            "stream_key": stream_key,
-                            "message_id": msg_id.decode(),
-                        }
+                            # Enrich the data with metadata about the stream key and message ID
+                            enriched_data = {
+                                "data": fields,
+                                "stream_key": stream_key,
+                                "message_id": msg_id,
+                            }
 
-                        # Use the output's save method
-                        self.output.save(enriched_data)
+                            # Use the output's save method
+                            self.output.save(enriched_data)
 
-                        # Update the state using the state
-                        current_state = self.state.get_state(self.id) or {
-                            "success_count": 0,
-                            "failure_count": 0,
-                        }
-                        current_state["success_count"] += 1
-                        self.state.set_state(self.id, current_state)
+                            # Update the state using the state
+                            current_state = self.state.get_state(self.id) or {
+                                "success_count": 0,
+                                "failure_count": 0,
+                                "last_id": last_id,
+                            }
+                            current_state["success_count"] += 1
+                            current_state["last_id"] = last_id
+                            self.state.set_state(self.id, current_state)
+                except Exception as e:
+                    self.log.exception(f"Failed to process SNS message: {e}")
+                    current_state["failure_count"] += 1
+                    self.state.set_state(self.id, current_state)
 
                 await asyncio.sleep(1)  # to prevent high CPU usage
 
@@ -81,6 +99,7 @@ class RedisStream(Spout):
             current_state = self.state.get_state(self.id) or {
                 "success_count": 0,
                 "failure_count": 0,
+                "last_id": last_id,
             }
             current_state["failure_count"] += 1
             self.state.set_state(self.id, current_state)

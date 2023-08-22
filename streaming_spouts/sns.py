@@ -35,23 +35,32 @@ class SNS(Spout):
         """
         try:
             while True:
-                messages = subscription.get_messages()
-                for message in messages:
-                    # Enrich the data with metadata about the subscription ARN
-                    enriched_data = {
-                        "data": message,
-                        "subscription_arn": subscription.arn,
-                    }
+                try:
+                    messages = subscription.get_messages()
+                    for message in messages:
+                        # Enrich the data with metadata about the subscription ARN
+                        enriched_data = {
+                            "data": message,
+                            "subscription_arn": subscription.arn,
+                        }
 
-                    # Use the output's save method
-                    self.output.save(enriched_data)
+                        # Use the output's save method
+                        self.output.save(enriched_data)
 
-                    # Update the state using the state
+                        # Update the state using the state
+                        current_state = self.state.get_state(self.id) or {
+                            "success_count": 0,
+                            "failure_count": 0,
+                        }
+                        current_state["success_count"] += 1
+                        self.state.set_state(self.id, current_state)
+                except Exception as e:
+                    self.log.exception(f"Failed to process SNS message: {e}")
                     current_state = self.state.get_state(self.id) or {
                         "success_count": 0,
                         "failure_count": 0,
                     }
-                    current_state["success_count"] += 1
+                    current_state["failure_count"] += 1
                     self.state.set_state(self.id, current_state)
         except ClientError as e:
             self.log.error(f"Error processing SNS message from subscription {subscription.arn}: {e}")
