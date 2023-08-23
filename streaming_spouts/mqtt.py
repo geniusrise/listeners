@@ -23,6 +23,65 @@ from geniusrise import Spout, State, StreamingOutput
 
 class MQTT(Spout):
     def __init__(self, output: StreamingOutput, state: State, **kwargs):
+        r"""
+        Initialize the MQTT class.
+
+        Args:
+            output (StreamingOutput): An instance of the StreamingOutput class for saving the data.
+            state (State): An instance of the State class for maintaining the state.
+            **kwargs: Additional keyword arguments.
+
+        ## Using geniusrise to invoke via command line
+        ```bash
+        genius MQTT rise \
+            streaming \
+                --output_kafka_topic mqtt_test \
+                --output_kafka_cluster_connection_string localhost:9094 \
+            postgres \
+                --postgres_host 127.0.0.1 \
+                --postgres_port 5432 \
+                --postgres_user postgres \
+                --postgres_password postgres \
+                --postgres_database geniusrise \
+                --postgres_table state \
+            listen \
+                --args host=localhost port=1883 topic=my_topic
+        ```
+
+        ## Using geniusrise to invoke via YAML file
+        ```yaml
+        version: "1"
+        spouts:
+            my_mqtt_spout:
+                name: "MQTT"
+                method: "listen"
+                args:
+                    host: "localhost"
+                    port: 1883
+                    topic: "my_topic"
+                output:
+                    type: "streaming"
+                    args:
+                        output_topic: "mqtt_test"
+                        kafka_servers: "localhost:9094"
+                state:
+                    type: "postgres"
+                    args:
+                        postgres_host: "127.0.0.1"
+                        postgres_port: 5432
+                        postgres_user: "postgres"
+                        postgres_password: "postgres"
+                        postgres_database: "geniusrise"
+                        postgres_table: "state"
+                deploy:
+                    type: "k8s"
+                    args:
+                        name: "my_mqtt_spout"
+                        namespace: "default"
+                        image: "my_mqtt_spout_image"
+                        replicas: 1
+        ```
+        """
         super().__init__(output, state)
         self.top_level_arguments = kwargs
 
@@ -30,10 +89,11 @@ class MQTT(Spout):
         """
         Callback function that is called when the client connects to the broker.
 
-        :param client: MQTT client instance.
-        :param userdata: Private user data as set in Client() or userdata_set().
-        :param flags: Response flags sent by the broker.
-        :param rc: Connection result.
+        Args:
+            client: MQTT client instance.
+            userdata: Private user data as set in Client() or userdata_set().
+            flags: Response flags sent by the broker.
+            rc: Connection result.
         """
         self.log.debug(f"Connected with result code {rc}")
         client.subscribe(self.topic)
@@ -42,9 +102,10 @@ class MQTT(Spout):
         """
         Callback function that is called when a message is received.
 
-        :param client: MQTT client instance.
-        :param userdata: Private user data as set in Client() or userdata_set().
-        :param msg: An instance of MQTTMessage.
+        Args:
+            client: MQTT client instance.
+            userdata: Private user data as set in Client() or userdata_set().
+            msg: An instance of MQTTMessage.
         """
         try:
             data = json.loads(msg.payload)
@@ -86,6 +147,13 @@ class MQTT(Spout):
     ):
         """
         Start listening for data from the MQTT broker.
+
+        Args:
+            host (str): The MQTT broker host. Defaults to "localhost".
+            port (int): The MQTT broker port. Defaults to 1883.
+            topic (str): The MQTT topic to subscribe to. Defaults to "#".
+            username (Optional[str]): The username for authentication. Defaults to None.
+            password (Optional[str]): The password for authentication. Defaults to None.
         """
         self.topic = topic
         try:
