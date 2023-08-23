@@ -23,6 +23,64 @@ from geniusrise import Spout, State, StreamingOutput
 
 class RabbitMQ(Spout):
     def __init__(self, output: StreamingOutput, state: State, **kwargs):
+        r"""
+        Initialize the RabbitMQ class.
+
+        Args:
+            output (StreamingOutput): An instance of the StreamingOutput class for saving the data.
+            state (State): An instance of the State class for maintaining the state.
+            **kwargs: Additional keyword arguments.
+
+        ## Using geniusrise to invoke via command line
+        ```bash
+        genius RabbitMQ rise \
+            streaming \
+                --output_kafka_topic rabbitmq_test \
+                --output_kafka_cluster_connection_string localhost:9094 \
+            postgres \
+                --postgres_host 127.0.0.1 \
+                --postgres_port 5432 \
+                --postgres_user postgres \
+                --postgres_password postgres \
+                --postgres_database geniusrise \
+                --postgres_table state \
+            listen \
+                --args queue_name=my_queue host=localhost
+        ```
+
+        ## Using geniusrise to invoke via YAML file
+        ```yaml
+        version: "1"
+        spouts:
+            my_rabbitmq_spout:
+                name: "RabbitMQ"
+                method: "listen"
+                args:
+                    queue_name: "my_queue"
+                    host: "localhost"
+                output:
+                    type: "streaming"
+                    args:
+                        output_topic: "rabbitmq_test"
+                        kafka_servers: "localhost:9094"
+                state:
+                    type: "postgres"
+                    args:
+                        postgres_host: "127.0.0.1"
+                        postgres_port: 5432
+                        postgres_user: "postgres"
+                        postgres_password: "postgres"
+                        postgres_database: "geniusrise"
+                        postgres_table: "state"
+                deploy:
+                    type: "k8s"
+                    args:
+                        name: "my_rabbitmq_spout"
+                        namespace: "default"
+                        image: "my_rabbitmq_spout_image"
+                        replicas: 1
+        ```
+        """
         super().__init__(output, state)
         self.top_level_arguments = kwargs
 
@@ -30,10 +88,11 @@ class RabbitMQ(Spout):
         """
         Callback function that is called when a message is received.
 
-        :param ch: Channel.
-        :param method: Method.
-        :param properties: Properties.
-        :param body: Message body.
+        Args:
+            ch: Channel.
+            method: Method.
+            properties: Properties.
+            body: Message body.
         """
         try:
             data = json.loads(body)
@@ -74,7 +133,16 @@ class RabbitMQ(Spout):
         password: Optional[str] = None,
     ):
         """
-        Start listening for data from the RabbitMQ server.
+        📖 Start listening for data from the RabbitMQ server.
+
+        Args:
+            queue_name (str): The RabbitMQ queue name to listen to.
+            host (str): The RabbitMQ server host. Defaults to "localhost".
+            username (Optional[str]): The username for authentication. Defaults to None.
+            password (Optional[str]): The password for authentication. Defaults to None.
+
+        Raises:
+            Exception: If unable to connect to the RabbitMQ server.
         """
         try:
             self.log.info("Starting RabbitMQ listener...")
