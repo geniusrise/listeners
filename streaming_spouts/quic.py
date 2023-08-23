@@ -36,6 +36,66 @@ class GeniusQuicProtocol(QuicConnectionProtocol):
 
 class Quic(Spout):
     def __init__(self, output: StreamingOutput, state: State, **kwargs):
+        r"""
+        Initialize the Quic class.
+
+        Args:
+            output (StreamingOutput): An instance of the StreamingOutput class for saving the data.
+            state (State): An instance of the State class for maintaining the state.
+            **kwargs: Additional keyword arguments.
+
+        ## Using geniusrise to invoke via command line
+        ```bash
+        genius Quic rise \
+            streaming \
+                --output_kafka_topic quic_test \
+                --output_kafka_cluster_connection_string localhost:9094 \
+            postgres \
+                --postgres_host 127.0.0.1 \
+                --postgres_port 5432 \
+                --postgres_user postgres \
+                --postgres_password postgres \
+                --postgres_database geniusrise \
+                --postgres_table state \
+            listen \
+                --args cert_path=/path/to/cert.pem key_path=/path/to/key.pem host=localhost port=4433
+        ```
+
+        ## Using geniusrise to invoke via YAML file
+        ```yaml
+        version: "1"
+        spouts:
+            my_quic_spout:
+                name: "Quic"
+                method: "listen"
+                args:
+                    cert_path: "/path/to/cert.pem"
+                    key_path: "/path/to/key.pem"
+                    host: "localhost"
+                    port: 4433
+                output:
+                    type: "streaming"
+                    args:
+                        output_topic: "quic_test"
+                        kafka_servers: "localhost:9094"
+                state:
+                    type: "postgres"
+                    args:
+                        postgres_host: "127.0.0.1"
+                        postgres_port: 5432
+                        postgres_user: "postgres"
+                        postgres_password: "postgres"
+                        postgres_database: "geniusrise"
+                        postgres_table: "state"
+                deploy:
+                    type: "k8s"
+                    args:
+                        name: "my_quic_spout"
+                        namespace: "default"
+                        image: "my_quic_spout_image"
+                        replicas: 1
+        ```
+        """
         super().__init__(output, state)
         self.top_level_arguments = kwargs
 
@@ -78,7 +138,16 @@ class Quic(Spout):
 
     def listen(self, cert_path: str, key_path: str, host: str = "localhost", port: int = 4433):
         """
-        Start listening for data from the QUIC server.
+        📖 Start listening for data from the QUIC server.
+
+        Args:
+            cert_path (str): Path to the certificate file.
+            key_path (str): Path to the private key file.
+            host (str): Hostname to listen on. Defaults to "localhost".
+            port (int): Port to listen on. Defaults to 4433.
+
+        Raises:
+            Exception: If unable to start the QUIC server.
         """
         configuration = QuicConfiguration(is_client=False)
         configuration.load_cert_chain(cert_path, key_path)
