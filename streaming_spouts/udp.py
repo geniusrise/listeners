@@ -21,12 +21,77 @@ from geniusrise import Spout, State, StreamingOutput
 
 class Udp(Spout):
     def __init__(self, output: StreamingOutput, state: State, **kwargs):
+        r"""
+        Initialize the Udp class.
+
+        Args:
+            output (StreamingOutput): An instance of the StreamingOutput class for saving the data.
+            state (State): An instance of the State class for maintaining the state.
+            **kwargs: Additional keyword arguments.
+
+        ## Using geniusrise to invoke via command line
+        ```bash
+        genius Udp rise \
+            streaming \
+                --output_kafka_topic udp_test \
+                --output_kafka_cluster_connection_string localhost:9094 \
+            postgres \
+                --postgres_host 127.0.0.1 \
+                --postgres_port 5432 \
+                --postgres_user postgres \
+                --postgres_password postgres \
+                --postgres_database geniusrise \
+                --postgres_table state \
+            listen \
+                --args host=localhost port=12345
+        ```
+
+        ## Using geniusrise to invoke via YAML file
+        ```yaml
+        version: "1"
+        spouts:
+            my_udp_spout:
+                name: "Udp"
+                method: "listen"
+                args:
+                    host: "localhost"
+                    port: 12345
+                output:
+                    type: "streaming"
+                    args:
+                        output_topic: "udp_test"
+                        kafka_servers: "localhost:9094"
+                state:
+                    type: "postgres"
+                    args:
+                        postgres_host: "127.0.0.1"
+                        postgres_port: 5432
+                        postgres_user: "postgres"
+                        postgres_password: "postgres"
+                        postgres_database: "geniusrise"
+                        postgres_table: "state"
+                deploy:
+                    type: "k8s"
+                    args:
+                        name: "my_udp_spout"
+                        namespace: "default"
+                        image: "my_udp_spout_image"
+                        replicas: 1
+        ```
+        """
         super().__init__(output, state)
         self.top_level_arguments = kwargs
 
     def listen(self, host: str = "localhost", port: int = 12345):
         """
-        Start listening for data from the UDP server.
+        📖 Start listening for data from the UDP server.
+
+        Args:
+            host (str): The UDP server host. Defaults to "localhost".
+            port (int): The UDP server port. Defaults to 12345.
+
+        Raises:
+            Exception: If unable to connect to the UDP server.
         """
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             s.bind((host, port))
