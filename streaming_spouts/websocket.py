@@ -22,6 +22,64 @@ from geniusrise import Spout, State, StreamingOutput
 
 class Websocket(Spout):
     def __init__(self, output: StreamingOutput, state: State, **kwargs):
+        r"""
+        Initialize the Websocket class.
+
+        Args:
+            output (StreamingOutput): An instance of the StreamingOutput class for saving the data.
+            state (State): An instance of the State class for maintaining the state.
+            **kwargs: Additional keyword arguments.
+
+        ## Using geniusrise to invoke via command line
+        ```bash
+        genius Websocket rise \
+            streaming \
+                --output_kafka_topic websocket_test \
+                --output_kafka_cluster_connection_string localhost:9094 \
+            postgres \
+                --postgres_host 127.0.0.1 \
+                --postgres_port 5432 \
+                --postgres_user postgres \
+                --postgres_password postgres \
+                --postgres_database geniusrise \
+                --postgres_table state \
+            listen \
+                --args host=localhost port=8765
+        ```
+
+        ## Using geniusrise to invoke via YAML file
+        ```yaml
+        version: "1"
+        spouts:
+            my_websocket_spout:
+                name: "Websocket"
+                method: "listen"
+                args:
+                    host: "localhost"
+                    port: 8765
+                output:
+                    type: "streaming"
+                    args:
+                        output_topic: "websocket_test"
+                        kafka_servers: "localhost:9094"
+                state:
+                    type: "postgres"
+                    args:
+                        postgres_host: "127.0.0.1"
+                        postgres_port: 5432
+                        postgres_user: "postgres"
+                        postgres_password: "postgres"
+                        postgres_database: "geniusrise"
+                        postgres_table: "state"
+                deploy:
+                    type: "k8s"
+                    args:
+                        name: "my_websocket_spout"
+                        namespace: "default"
+                        image: "my_websocket_spout_image"
+                        replicas: 1
+        ```
+        """
         super().__init__(output, state)
         self.top_level_arguments = kwargs
 
@@ -36,8 +94,9 @@ class Websocket(Spout):
         """
         Receive a message from a WebSocket client and save it along with metadata.
 
-        :param websocket: WebSocket client connection.
-        :param path: WebSocket path.
+        Args:
+            websocket: WebSocket client connection.
+            path: WebSocket path.
         """
         try:
             data = await websocket.recv()
@@ -72,6 +131,13 @@ class Websocket(Spout):
 
     def listen(self, host: str = "localhost", port: int = 8765):
         """
-        Start the WebSocket server.
+        📖 Start the WebSocket server.
+
+        Args:
+            host (str): The WebSocket server host. Defaults to "localhost".
+            port (int): The WebSocket server port. Defaults to 8765.
+
+        Raises:
+            Exception: If unable to start the WebSocket server.
         """
         asyncio.run(self.__listen(host, port))
