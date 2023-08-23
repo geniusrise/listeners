@@ -20,13 +20,80 @@ from geniusrise import Spout, State, StreamingOutput
 
 class SQS(Spout):
     def __init__(self, output: StreamingOutput, state: State, **kwargs):
+        r"""
+        Initialize the SQS class.
+
+        Args:
+            output (StreamingOutput): An instance of the StreamingOutput class for saving the data.
+            state (State): An instance of the State class for maintaining the state.
+            **kwargs: Additional keyword arguments.
+
+        ## Using geniusrise to invoke via command line
+        ```bash
+        genius SQS rise \
+            streaming \
+                --output_kafka_topic sqs_test \
+                --output_kafka_cluster_connection_string localhost:9094 \
+            postgres \
+                --postgres_host 127.0.0.1 \
+                --postgres_port 5432 \
+                --postgres_user postgres \
+                --postgres_password postgres \
+                --postgres_database geniusrise \
+                --postgres_table state \
+            listen \
+                --args queue_url=https://sqs.us-east-1.amazonaws.com/123456789012/my-queue batch_size=10 batch_interval=10
+        ```
+
+        ## Using geniusrise to invoke via YAML file
+        ```yaml
+        version: "1"
+        spouts:
+            my_sqs_spout:
+                name: "SQS"
+                method: "listen"
+                args:
+                    queue_url: "https://sqs.us-east-1.amazonaws.com/123456789012/my-queue"
+                    batch_size: 10
+                    batch_interval: 10
+                output:
+                    type: "streaming"
+                    args:
+                        output_topic: "sqs_test"
+                        kafka_servers: "localhost:9094"
+                state:
+                    type: "postgres"
+                    args:
+                        postgres_host: "127.0.0.1"
+                        postgres_port: 5432
+                        postgres_user: "postgres"
+                        postgres_password: "postgres"
+                        postgres_database: "geniusrise"
+                        postgres_table: "state"
+                deploy:
+                    type: "k8s"
+                    args:
+                        name: "my_sqs_spout"
+                        namespace: "default"
+                        image: "my_sqs_spout_image"
+                        replicas: 1
+        ```
+        """
         super().__init__(output, state)
         self.top_level_arguments = kwargs
         self.sqs = boto3.client("sqs")
 
     def listen(self, queue_url: str, batch_size: int = 10, batch_interval: int = 10):
         """
-        Start listening for new messages in the SQS queue.
+        📖 Start listening for new messages in the SQS queue.
+
+        Args:
+            queue_url (str): The URL of the SQS queue to listen to.
+            batch_size (int): The maximum number of messages to receive in each batch. Defaults to 10.
+            batch_interval (int): The time in seconds to wait for a new message if the queue is empty. Defaults to 10.
+
+        Raises:
+            Exception: If unable to connect to the SQS service.
         """
         self.queue_url = queue_url
         while True:
