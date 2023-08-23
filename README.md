@@ -24,6 +24,11 @@ This is a collection of generic streaming and (micro) batch spouts.
     - [Redis Streams](#redis-streams)
     - [AWS SNS](#aws-sns)
     - [AWS SQS](#aws-sqs)
+    - [socket.io](#socketio)
+    - [ActiveMQ](#activemq)
+    - [Kinesis](#kinesis)
+    - [Grpc](#grpc)
+    - [ZeroMQ](#zeromq)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -55,6 +60,16 @@ Includes:
 | 22  | [AWS SNS](streaming_spouts/sns.py)                 | AWS client that listens to SNS notifications          | Batch       | AWS SNS       |
 | 23  | [AWS SQS](streaming_spouts/sqs.py)                 | AWS client that listens to messages from an SQS queue | Streaming   | AWS SQS       |
 | 24  | [AWS SQS](streaming_spouts/sqs.py)                 | AWS client that listens to messages from an SQS queue | Batch       | AWS SQS       |
+| 25  | [SocketIo](streaming_spouts/socketio.py)           | SocketIo client that listens to a namespace           | Streaming   | SocketIo      |
+| 26  | [SocketIo](streaming_spouts/socketio.py)           | SocketIo client that listens to a namespace           | Batch       | SocketIo      |
+| 27  | [ActiveMQ](streaming_spouts/activemq.py)           | ActiveMQ client that listens to a queue               | Streaming   | ActiveMQ      |
+| 28  | [ActiveMQ](streaming_spouts/activemq.py)           | ActiveMQ client that listens to a queue               | Batch       | ActiveMQ      |
+| 29  | [Kinesis](streaming_spouts/kinesis.py)             | Kinesis client that listens to a stream               | Streaming   | Kinesis       |
+| 30  | [Kinesis](streaming_spouts/kinesis.py)             | Kinesis client that listens to a stream               | Batch       | Kinesis       |
+| 31  | [Grpc](streaming_spouts/grpc.py)                   | gRPC client that listens to a server                  | Streaming   | gRPC          |
+| 32  | [Grpc](streaming_spouts/grpc.py)                   | gRPC client that listens to a server                  | Batch       | gRPC          |
+| 33  | [ZeroMQ](streaming_spouts/zeromq.py)               | ZeroMQ client that listens to a topic                 | Streaming   | ZeroMQ        |
+| 34  | [ZeroMQ](streaming_spouts/zeromq.py)               | ZeroMQ client that listens to a topic                 | Batch       | ZeroMQ        |
 
 # Streaming Spouts
 
@@ -82,8 +97,6 @@ docker exec -it geniusrise-postgres-1 psql -U postgres
 ```
 
 ### Webhooks
-
-Run the spout:
 
 ```bash
 genius Webhook rise \
@@ -381,4 +394,124 @@ Test:
 
 ```bash
 aws sqs send-message --queue-url https://sqs.ap-south-1.amazonaws.com/866011655254/geniusrise_test --message-body '{"test": "sqs message"}'
+```
+
+### socket.io
+
+```bash
+genius SocketIo rise \
+    streaming \
+    --output_kafka_topic socketio_test \
+    --output_kafka_cluster_connection_string localhost:9094 \
+    postgres \
+    --postgres_host 127.0.0.1 \
+    --postgres_port 5432 \
+    --postgres_user postgres \
+    --postgres_password postgres \
+    --postgres_database geniusrise \
+    --postgres_table state \
+    listen \
+    --args url=http://localhost:3000 namespace=/chat
+```
+
+Test:
+
+```bash
+# Use a SocketIo client to emit a message to the specified namespace.
+```
+
+### ActiveMQ
+
+```bash
+genius ActiveMQ rise \
+    streaming \
+    --output_kafka_topic activemq_test \
+    --output_kafka_cluster_connection_string localhost:9094 \
+    postgres \
+    --postgres_host 127.0.0.1 \
+    --postgres_port 5432 \
+    --postgres_user postgres \
+    --postgres_password postgres \
+    --postgres_database geniusrise \
+    --postgres_table state \
+    listen \
+    --args host=localhost port=61613 destination=my_queue
+```
+
+Test:
+
+```bash
+# Use an ActiveMQ client to send a message to the specified destination.
+```
+
+### Kinesis
+
+```bash
+genius Kinesis rise \
+    streaming \
+    --output_kafka_topic kinesis_test \
+    --output_kafka_cluster_connection_string localhost:9094 \
+    postgres \
+    --postgres_host 127.0.0.1 \
+    --postgres_port 5432 \
+    --postgres_user postgres \
+    --postgres_password postgres \
+    --postgres_database geniusrise \
+    --postgres_table state \
+    listen \
+    --args stream_name=my_stream shard_id=shardId-000000000000
+```
+
+Test:
+
+```bash
+# Use the AWS CLI or SDK to put a record into the specified Kinesis stream.
+```
+
+### Grpc
+
+```bash
+genius Grpc rise \
+    streaming \
+    --output_kafka_topic grpc_test \
+    --output_kafka_cluster_connection_string localhost:9094 \
+    postgres \
+    --postgres_host 127.0.0.1 \
+    --postgres_port 5432 \
+    --postgres_user postgres \
+    --postgres_password postgres \
+    --postgres_database geniusrise \
+    --postgres_table state \
+    listen \
+    --args server_address=localhost:50051 request_data=my_request syntax=proto3
+```
+
+Test:
+
+```bash
+# Use a gRPC client to send a message to the specified server address.
+```
+
+### ZeroMQ
+
+```bash
+genius ZeroMQ rise \
+    streaming \
+    --output_kafka_topic zmq_test \
+    --output_kafka_cluster_connection_string localhost:9094 \
+    postgres \
+    --postgres_host 127.0.0.1 \
+    --postgres_port 5432 \
+    --postgres_user postgres \
+    --postgres_password postgres \
+    --postgres_database geniusrise \
+    --postgres_table state \
+    listen \
+    --args endpoint=tcp://localhost:5555 topic=my_topic syntax=json
+```
+
+Test:
+
+```bash
+# Use a ZeroMQ client to send a message to the specified endpoint and topic.
 ```
