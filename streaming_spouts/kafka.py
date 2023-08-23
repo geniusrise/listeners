@@ -23,6 +23,64 @@ from geniusrise import Spout, State, StreamingOutput
 
 class Kafka(Spout):
     def __init__(self, output: StreamingOutput, state: State, **kwargs):
+        r"""
+        Initialize the Kafka class.
+
+        Args:
+            output (StreamingOutput): An instance of the StreamingOutput class for saving the data.
+            state (State): An instance of the State class for maintaining the state.
+            **kwargs: Additional keyword arguments.
+
+        ## Using geniusrise to invoke via command line
+        ```bash
+        genius Kafka rise \
+            streaming \
+                --output_kafka_topic kafka_test \
+                --output_kafka_cluster_connection_string localhost:9094 \
+            postgres \
+                --postgres_host 127.0.0.1 \
+                --postgres_port 5432 \
+                --postgres_user postgres \
+                --postgres_password postgres \
+                --postgres_database geniusrise \
+                --postgres_table state \
+            listen \
+                --args topic=my_topic group_id=my_group
+        ```
+
+        ## Using geniusrise to invoke via YAML file
+        ```yaml
+        version: "1"
+        spouts:
+            my_kafka_spout:
+                name: "Kafka"
+                method: "listen"
+                args:
+                    topic: "my_topic"
+                    group_id: "my_group"
+                output:
+                    type: "streaming"
+                    args:
+                        output_topic: "kafka_test"
+                        kafka_servers: "localhost:9094"
+                state:
+                    type: "postgres"
+                    args:
+                        postgres_host: "127.0.0.1"
+                        postgres_port: 5432
+                        postgres_user: "postgres"
+                        postgres_password: "postgres"
+                        postgres_database: "geniusrise"
+                        postgres_table: "state"
+                deploy:
+                    type: "k8s"
+                    args:
+                        name: "my_kafka_spout"
+                        namespace: "default"
+                        image: "my_kafka_spout_image"
+                        replicas: 1
+        ```
+        """
         super().__init__(output, state)
         self.top_level_arguments = kwargs
 
@@ -35,7 +93,17 @@ class Kafka(Spout):
         password: Optional[str] = None,
     ):
         """
-        Start listening for data from the Kafka topic.
+        📖 Start listening for data from the Kafka topic.
+
+        Args:
+            topic (str): The Kafka topic to listen to.
+            group_id (str): The Kafka consumer group ID.
+            bootstrap_servers (str): The Kafka bootstrap servers. Defaults to "localhost:9092".
+            username (Optional[str]): The username for SASL/PLAIN authentication. Defaults to None.
+            password (Optional[str]): The password for SASL/PLAIN authentication. Defaults to None.
+
+        Raises:
+            Exception: If unable to connect to the Kafka server.
         """
         config = {
             "bootstrap.servers": bootstrap_servers,
