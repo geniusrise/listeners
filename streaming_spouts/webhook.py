@@ -23,6 +23,64 @@ from geniusrise import Spout, State, StreamingOutput
 
 class Webhook(Spout):
     def __init__(self, output: StreamingOutput, state: State, **kwargs):
+        r"""
+        Initialize the Webhook class.
+
+        Args:
+            output (StreamingOutput): An instance of the StreamingOutput class for saving the data.
+            state (State): An instance of the State class for maintaining the state.
+            **kwargs: Additional keyword arguments.
+
+        ## Using geniusrise to invoke via command line
+        ```bash
+        genius Webhook rise \
+            streaming \
+                --output_kafka_topic webhook_test \
+                --output_kafka_cluster_connection_string localhost:9094 \
+            postgres \
+                --postgres_host 127.0.0.1 \
+                --postgres_port 5432 \
+                --postgres_user postgres \
+                --postgres_password postgres \
+                --postgres_database geniusrise \
+                --postgres_table state \
+            listen \
+                --args endpoint=* port=3000
+        ```
+
+        ## Using geniusrise to invoke via YAML file
+        ```yaml
+        version: "1"
+        spouts:
+            my_webhook_spout:
+                name: "Webhook"
+                method: "listen"
+                args:
+                    endpoint: "*"
+                    port: 3000
+                output:
+                    type: "streaming"
+                    args:
+                        output_topic: "webhook_test"
+                        kafka_servers: "localhost:9094"
+                state:
+                    type: "postgres"
+                    args:
+                        postgres_host: "127.0.0.1"
+                        postgres_port: 5432
+                        postgres_user: "postgres"
+                        postgres_password: "postgres"
+                        postgres_database: "geniusrise"
+                        postgres_table: "state"
+                deploy:
+                    type: "k8s"
+                    args:
+                        name: "my_webhook_spout"
+                        namespace: "default"
+                        image: "my_webhook_spout_image"
+                        replicas: 1
+        ```
+        """
         super().__init__(output, state)
         self.buffer: List[dict] = []
 
@@ -88,7 +146,16 @@ class Webhook(Spout):
         password: Optional[str] = None,
     ):
         """
-        Start listening for data from the webhook.
+        📖 Start listening for data from the webhook.
+
+        Args:
+            endpoint (str): The webhook endpoint to listen to. Defaults to "*".
+            port (int): The port to listen on. Defaults to 3000.
+            username (Optional[str]): The username for basic authentication. Defaults to None.
+            password (Optional[str]): The password for basic authentication. Defaults to None.
+
+        Raises:
+            Exception: If unable to start the CherryPy server.
         """
         # Disable CherryPy's default loggers
         cherrypy.log.access_log.propagate = False
