@@ -23,15 +23,73 @@ from geniusrise import Spout, State, StreamingOutput
 
 class SNS(Spout):
     def __init__(self, output: StreamingOutput, state: State, **kwargs):
+        r"""
+        Initialize the SNS class.
+
+        Args:
+            output (StreamingOutput): An instance of the StreamingOutput class for saving the data.
+            state (State): An instance of the State class for maintaining the state.
+            **kwargs: Additional keyword arguments.
+
+        ## Using geniusrise to invoke via command line
+        ```bash
+        genius SNS rise \
+            streaming \
+                --output_kafka_topic sns_test \
+                --output_kafka_cluster_connection_string localhost:9094 \
+            postgres \
+                --postgres_host 127.0.0.1 \
+                --postgres_port 5432 \
+                --postgres_user postgres \
+                --postgres_password postgres \
+                --postgres_database geniusrise \
+                --postgres_table state \
+            listen
+        ```
+
+        ## Using geniusrise to invoke via YAML file
+        ```yaml
+        version: "1"
+        spouts:
+            my_sns_spout:
+                name: "SNS"
+                method: "listen"
+                output:
+                    type: "streaming"
+                    args:
+                        output_topic: "sns_test"
+                        kafka_servers: "localhost:9094"
+                state:
+                    type: "postgres"
+                    args:
+                        postgres_host: "127.0.0.1"
+                        postgres_port: 5432
+                        postgres_user: "postgres"
+                        postgres_password: "postgres"
+                        postgres_database: "geniusrise"
+                        postgres_table: "state"
+                deploy:
+                    type: "k8s"
+                    args:
+                        name: "my_sns_spout"
+                        namespace: "default"
+                        image: "my_sns_spout_image"
+                        replicas: 1
+        ```
+        """
         super().__init__(output, state)
         self.top_level_arguments = kwargs
         self.sns = boto3.resource("sns")
 
     async def _listen_to_subscription(self, subscription):
         """
-        Listen to a specific subscription.
+        📖 Listen to a specific subscription.
 
-        :param subscription: The subscription to listen to.
+        Args:
+            subscription: The subscription to listen to.
+
+        Raises:
+            ClientError: If unable to connect to the AWS SNS service.
         """
         try:
             while True:
@@ -75,7 +133,10 @@ class SNS(Spout):
 
     async def _listen(self):
         """
-        Start listening for data from AWS SNS.
+        📖 Start listening for data from AWS SNS.
+
+        Raises:
+            ClientError: If unable to connect to the AWS SNS service.
         """
         try:
             for topic in self.sns.topics.all():
@@ -95,7 +156,7 @@ class SNS(Spout):
 
     def listen(self):
         """
-        Start the asyncio event loop to listen for data from AWS SNS.
+        📖 Start the asyncio event loop to listen for data from AWS SNS.
         """
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self._listen())
