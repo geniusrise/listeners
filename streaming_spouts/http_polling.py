@@ -24,6 +24,65 @@ from requests.exceptions import HTTPError, RequestException
 
 class RESTAPIPoll(Spout):
     def __init__(self, output: StreamingOutput, state: State, **kwargs):
+        r"""
+        Initialize the RESTAPIPoll class.
+
+        Args:
+            output (StreamingOutput): An instance of the StreamingOutput class for saving the data.
+            state (State): An instance of the State class for maintaining the state.
+            **kwargs: Additional keyword arguments.
+
+        ## Using geniusrise to invoke via command line
+        ```bash
+        genius RESTAPIPoll rise \
+            streaming \
+                --output_kafka_topic restapi_test \
+                --output_kafka_cluster_connection_string localhost:9094 \
+            postgres \
+                --postgres_host 127.0.0.1 \
+                --postgres_port 5432 \
+                --postgres_user postgres \
+                --postgres_password postgres \
+                --postgres_database geniusrise \
+                --postgres_table state \
+            listen \
+                --args url=https://api.example.com method=GET interval=60
+        ```
+
+        ## Using geniusrise to invoke via YAML file
+        ```yaml
+        version: "1"
+        spouts:
+            my_restapi_poll:
+                name: "RESTAPIPoll"
+                method: "listen"
+                args:
+                    url: "https://api.example.com"
+                    method: "GET"
+                    interval: 60
+                output:
+                    type: "streaming"
+                    args:
+                        output_topic: "restapi_test"
+                        kafka_servers: "localhost:9094"
+                state:
+                    type: "postgres"
+                    args:
+                        postgres_host: "127.0.0.1"
+                        postgres_port: 5432
+                        postgres_user: "postgres"
+                        postgres_password: "postgres"
+                        postgres_database: "geniusrise"
+                        postgres_table: "state"
+                deploy:
+                    type: "k8s"
+                    args:
+                        name: "my_restapi_poll"
+                        namespace: "default"
+                        image: "my_restapi_poll_image"
+                        replicas: 1
+        ```
+        """
         super().__init__(output, state)
         self.top_level_arguments = kwargs
 
@@ -36,13 +95,18 @@ class RESTAPIPoll(Spout):
         params: Optional[Dict[str, str]] = None,
     ):
         """
-        Poll the REST API for data.
+        📖 Start polling the REST API for data.
 
-        :param url: The API endpoint.
-        :param method: The HTTP method (GET, POST, etc.).
-        :param body: The request body.
-        :param headers: The request headers.
-        :param params: The request query parameters.
+        Args:
+            url (str): The API endpoint.
+            method (str): The HTTP method (GET, POST, etc.).
+            interval (int): The polling interval in seconds.
+            body (Optional[Dict]): The request body. Defaults to None.
+            headers (Optional[Dict[str, str]]): The request headers. Defaults to None.
+            params (Optional[Dict[str, str]]): The request query parameters. Defaults to None.
+
+        Raises:
+            Exception: If unable to connect to the REST API server.
         """
         try:
             response = getattr(requests, method.lower())(url, json=body, headers=headers, params=params)
@@ -97,12 +161,13 @@ class RESTAPIPoll(Spout):
         """
         Start polling the REST API for data.
 
-        :param url: The API endpoint.
-        :param method: The HTTP method (GET, POST, etc.).
-        :param interval: The polling interval in seconds.
-        :param body: The request body.
-        :param headers: The request headers.
-        :param params: The request query parameters.
+        Args:
+            url (str): The API endpoint.
+            method (str): The HTTP method (GET, POST, etc.).
+            interval (int): The polling interval in seconds. Defaults to 60.
+            body (Optional[Dict]): The request body. Defaults to None.
+            headers (Optional[Dict[str, str]]): The request headers. Defaults to None.
+            params (Optional[Dict[str, str]]): The request query parameters. Defaults to None.
         """
 
         while True:
