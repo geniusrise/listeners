@@ -5,7 +5,8 @@
 
 # Generic Streaming Spouts
 
-This is a collection of generic streaming and (micro) batch spouts.
+This is a collection of generic streaming and (micro) batch spouts with the help
+of stream_to_batch output.
 
 **Table of Contents**
 
@@ -37,39 +38,22 @@ Includes:
 | No. | Name                                               | Description                                           | Output Type | Input Type    |
 | --- | -------------------------------------------------- | ----------------------------------------------------- | ----------- | ------------- |
 | 1   | [Webhook](streaming_spouts/webhook.py)             | Cherrypy server that accepts all HTTP API calls       | Streaming   | HTTP          |
-| 2   | [Webhook](streaming_spouts/webhook.py)             | Cherrypy server that accepts all HTTP API calls       | Batch       | HTTP          |
-| 3   | [Kafka](streaming_spouts/kafka.py)                 | Kafka client that listens to a topic                  | Streaming   | Kafka         |
-| 4   | [Kafka](streaming_spouts/kafka.py)                 | Kafka client that listens to a topic                  | Batch       | Kafka         |
-| 5   | [Websocket](streaming_spouts/websocket.py)         | Websocket server that listens to a socket             | Streaming   | Websocket     |
-| 6   | [Websocket](streaming_spouts/websocket.py)         | Websocket server that listens to a socket             | Batch       | Websocket     |
-| 7   | [UDP](streaming_spouts/udp.py)                     | UDP server that listens to a given port               | Streaming   | UDP           |
-| 8   | [UDP](streaming_spouts/udp.py)                     | UDP server that listens to a given port               | Batch       | UDP           |
-| 9   | [QUIC](streaming_spouts/quic.py)                   | Aioquic server that listens to a given port           | Streaming   | QUIC          |
-| 10  | [QUIC](streaming_spouts/quic.py)                   | Aioquic server that listens to a given port           | Batch       | QUIC          |
-| 11  | [HTTP Polling](streaming_spouts/http_polling.py)   | HTTP client that keeps polling an API                 | Streaming   | HTTP          |
-| 12  | [HTTP Polling](streaming_spouts/http_polling.py)   | HTTP client that keeps polling an API                 | Batch       | HTTP          |
-| 13  | [RabbitMQ / AMQP](streaming_spouts/amqp.py)        | RabbitMQ client that listens to a given queue         | Streaming   | AMQP          |
-| 14  | [RabbitMQ / AMQP](streaming_spouts/amqp.py)        | RabbitMQ client that listens to a given queue         | Batch       | AMQP          |
-| 15  | [MQTT](streaming_spouts/mqtt.py)                   | MQTT client that subscribes and listens to a topic    | Streaming   | MQTT          |
-| 16  | [MQTT](streaming_spouts/mqtt.py)                   | MQTT client that subscribes and listens to a topic    | Batch       | MQTT          |
-| 17  | [Redis Pub-Sub](streaming_spouts/redis_pubsub.py)  | Redis client that subscribes to a Pub/Sub channel     | Streaming   | Redis Pub-Sub |
-| 18  | [Redis Pub-Sub](streaming_spouts/redis_pubsub.py)  | Redis client that subscribes to a Pub/Sub channel     | Batch       | Redis Pub-Sub |
-| 19  | [Redis Streams](streaming_spouts/redis_streams.py) | Redis client that listens to a stream                 | Streaming   | Redis Streams |
-| 20  | [Redis Streams](streaming_spouts/redis_streams.py) | Redis client that listens to a stream                 | Batch       | Redis Streams |
-| 21  | [AWS SNS](streaming_spouts/sns.py)                 | AWS client that listens to SNS notifications          | Streaming   | AWS SNS       |
-| 22  | [AWS SNS](streaming_spouts/sns.py)                 | AWS client that listens to SNS notifications          | Batch       | AWS SNS       |
-| 23  | [AWS SQS](streaming_spouts/sqs.py)                 | AWS client that listens to messages from an SQS queue | Streaming   | AWS SQS       |
-| 24  | [AWS SQS](streaming_spouts/sqs.py)                 | AWS client that listens to messages from an SQS queue | Batch       | AWS SQS       |
-| 25  | [SocketIo](streaming_spouts/socketio.py)           | SocketIo client that listens to a namespace           | Streaming   | SocketIo      |
-| 26  | [SocketIo](streaming_spouts/socketio.py)           | SocketIo client that listens to a namespace           | Batch       | SocketIo      |
-| 27  | [ActiveMQ](streaming_spouts/activemq.py)           | ActiveMQ client that listens to a queue               | Streaming   | ActiveMQ      |
-| 28  | [ActiveMQ](streaming_spouts/activemq.py)           | ActiveMQ client that listens to a queue               | Batch       | ActiveMQ      |
-| 29  | [Kinesis](streaming_spouts/kinesis.py)             | Kinesis client that listens to a stream               | Streaming   | Kinesis       |
-| 30  | [Kinesis](streaming_spouts/kinesis.py)             | Kinesis client that listens to a stream               | Batch       | Kinesis       |
-| 31  | [Grpc](streaming_spouts/grpc.py)                   | gRPC client that listens to a server                  | Streaming   | gRPC          |
-| 32  | [Grpc](streaming_spouts/grpc.py)                   | gRPC client that listens to a server                  | Batch       | gRPC          |
-| 33  | [ZeroMQ](streaming_spouts/zeromq.py)               | ZeroMQ client that listens to a topic                 | Streaming   | ZeroMQ        |
-| 34  | [ZeroMQ](streaming_spouts/zeromq.py)               | ZeroMQ client that listens to a topic                 | Batch       | ZeroMQ        |
+| 2   | [Kafka](streaming_spouts/kafka.py)                 | Kafka client that listens to a topic                  | Streaming   | Kafka         |
+| 3   | [Websocket](streaming_spouts/websocket.py)         | Websocket server that listens to a socket             | Streaming   | Websocket     |
+| 4   | [UDP](streaming_spouts/udp.py)                     | UDP server that listens to a given port               | Streaming   | UDP           |
+| 5   | [QUIC](streaming_spouts/quic.py)                   | Aioquic server that listens to a given port           | Streaming   | QUIC          |
+| 6   | [HTTP Polling](streaming_spouts/http_polling.py)   | HTTP client that keeps polling an API                 | Streaming   | HTTP          |
+| 7   | [RabbitMQ / AMQP](streaming_spouts/amqp.py)        | RabbitMQ client that listens to a given queue         | Streaming   | AMQP          |
+| 8   | [MQTT](streaming_spouts/mqtt.py)                   | MQTT client that subscribes and listens to a topic    | Streaming   | MQTT          |
+| 9   | [Redis Pub-Sub](streaming_spouts/redis_pubsub.py)  | Redis client that subscribes to a Pub/Sub channel     | Streaming   | Redis Pub-Sub |
+| 10  | [Redis Streams](streaming_spouts/redis_streams.py) | Redis client that listens to a stream                 | Streaming   | Redis Streams |
+| 11  | [AWS SNS](streaming_spouts/sns.py)                 | AWS client that listens to SNS notifications          | Streaming   | AWS SNS       |
+| 12  | [AWS SQS](streaming_spouts/sqs.py)                 | AWS client that listens to messages from an SQS queue | Streaming   | AWS SQS       |
+| 13  | [SocketIo](streaming_spouts/socketio.py)           | SocketIo client that listens to a namespace           | Streaming   | SocketIo      |
+| 14  | [ActiveMQ](streaming_spouts/activemq.py)           | ActiveMQ client that listens to a queue               | Streaming   | ActiveMQ      |
+| 15  | [Kinesis](streaming_spouts/kinesis.py)             | Kinesis client that listens to a stream               | Streaming   | Kinesis       |
+| 16  | [Grpc](streaming_spouts/grpc.py)                   | gRPC client that listens to a server                  | Streaming   | gRPC          |
+| 17  | [ZeroMQ](streaming_spouts/zeromq.py)               | ZeroMQ client that listens to a topic                 | Streaming   | ZeroMQ        |
 
 # Streaming Spouts
 
