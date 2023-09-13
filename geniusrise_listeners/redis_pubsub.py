@@ -37,13 +37,6 @@ class RedisPubSub(Spout):
             streaming \
                 --output_kafka_topic redis_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
-            postgres \
-                --postgres_host 127.0.0.1 \
-                --postgres_port 5432 \
-                --postgres_user postgres \
-                --postgres_password postgres \
-                --postgres_database geniusrise \
-                --postgres_table state \
             listen \
                 --args channel=my_channel host=localhost port=6379 db=0
         ```
@@ -65,22 +58,6 @@ class RedisPubSub(Spout):
                     args:
                         output_topic: "redis_test"
                         kafka_servers: "localhost:9094"
-                state:
-                    type: "postgres"
-                    args:
-                        postgres_host: "127.0.0.1"
-                        postgres_port: 5432
-                        postgres_user: "postgres"
-                        postgres_password: "postgres"
-                        postgres_database: "geniusrise"
-                        postgres_table: "state"
-                deploy:
-                    type: "k8s"
-                    args:
-                        name: "my_redis_spout"
-                        namespace: "default"
-                        image: "my_redis_spout_image"
-                        replicas: 1
         ```
         """
         super().__init__(output, state)

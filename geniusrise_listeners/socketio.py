@@ -35,13 +35,6 @@ class SocketIo(Spout):
             streaming \
                 --output_kafka_topic socketio_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
-            postgres \
-                --postgres_host 127.0.0.1 \
-                --postgres_port 5432 \
-                --postgres_user postgres \
-                --postgres_password postgres \
-                --postgres_database geniusrise \
-                --postgres_table state \
             listen \
                 --args url=http://localhost:3000 namespace=/chat
         ```
@@ -61,22 +54,6 @@ class SocketIo(Spout):
                     args:
                         output_topic: "socketio_test"
                         kafka_servers: "localhost:9094"
-                state:
-                    type: "postgres"
-                    args:
-                        postgres_host: "127.0.0.1"
-                        postgres_port: 5432
-                        postgres_user: "postgres"
-                        postgres_password: "postgres"
-                        postgres_database: "geniusrise"
-                        postgres_table: "state"
-                deploy:
-                    type: "k8s"
-                    args:
-                        name: "my_socketio_spout"
-                        namespace: "default"
-                        image: "my_socketio_spout_image"
-                        replicas: 1
         ```
         """
         super().__init__(output, state)

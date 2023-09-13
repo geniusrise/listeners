@@ -35,13 +35,6 @@ class Udp(Spout):
             streaming \
                 --output_kafka_topic udp_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
-            postgres \
-                --postgres_host 127.0.0.1 \
-                --postgres_port 5432 \
-                --postgres_user postgres \
-                --postgres_password postgres \
-                --postgres_database geniusrise \
-                --postgres_table state \
             listen \
                 --args host=localhost port=12345
         ```
@@ -61,22 +54,6 @@ class Udp(Spout):
                     args:
                         output_topic: "udp_test"
                         kafka_servers: "localhost:9094"
-                state:
-                    type: "postgres"
-                    args:
-                        postgres_host: "127.0.0.1"
-                        postgres_port: 5432
-                        postgres_user: "postgres"
-                        postgres_password: "postgres"
-                        postgres_database: "geniusrise"
-                        postgres_table: "state"
-                deploy:
-                    type: "k8s"
-                    args:
-                        name: "my_udp_spout"
-                        namespace: "default"
-                        image: "my_udp_spout_image"
-                        replicas: 1
         ```
         """
         super().__init__(output, state)

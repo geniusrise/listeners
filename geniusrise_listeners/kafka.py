@@ -37,13 +37,6 @@ class Kafka(Spout):
             streaming \
                 --output_kafka_topic kafka_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
-            postgres \
-                --postgres_host 127.0.0.1 \
-                --postgres_port 5432 \
-                --postgres_user postgres \
-                --postgres_password postgres \
-                --postgres_database geniusrise \
-                --postgres_table state \
             listen \
                 --args topic=my_topic group_id=my_group
         ```
@@ -63,22 +56,6 @@ class Kafka(Spout):
                     args:
                         output_topic: "kafka_test"
                         kafka_servers: "localhost:9094"
-                state:
-                    type: "postgres"
-                    args:
-                        postgres_host: "127.0.0.1"
-                        postgres_port: 5432
-                        postgres_user: "postgres"
-                        postgres_password: "postgres"
-                        postgres_database: "geniusrise"
-                        postgres_table: "state"
-                deploy:
-                    type: "k8s"
-                    args:
-                        name: "my_kafka_spout"
-                        namespace: "default"
-                        image: "my_kafka_spout_image"
-                        replicas: 1
         ```
         """
         super().__init__(output, state)

@@ -38,13 +38,6 @@ class RESTAPIPoll(Spout):
             streaming \
                 --output_kafka_topic restapi_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
-            postgres \
-                --postgres_host 127.0.0.1 \
-                --postgres_port 5432 \
-                --postgres_user postgres \
-                --postgres_password postgres \
-                --postgres_database geniusrise \
-                --postgres_table state \
             listen \
                 --args url=https://api.example.com method=GET interval=60
         ```
@@ -65,22 +58,6 @@ class RESTAPIPoll(Spout):
                     args:
                         output_topic: "restapi_test"
                         kafka_servers: "localhost:9094"
-                state:
-                    type: "postgres"
-                    args:
-                        postgres_host: "127.0.0.1"
-                        postgres_port: 5432
-                        postgres_user: "postgres"
-                        postgres_password: "postgres"
-                        postgres_database: "geniusrise"
-                        postgres_table: "state"
-                deploy:
-                    type: "k8s"
-                    args:
-                        name: "my_restapi_poll"
-                        namespace: "default"
-                        image: "my_restapi_poll_image"
-                        replicas: 1
         ```
         """
         super().__init__(output, state)
