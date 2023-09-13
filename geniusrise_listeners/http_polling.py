@@ -38,6 +38,7 @@ class RESTAPIPoll(Spout):
             streaming \
                 --output_kafka_topic restapi_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
+            none \
             listen \
                 --args url=https://api.example.com method=GET interval=60
         ```

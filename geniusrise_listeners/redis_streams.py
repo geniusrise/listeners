@@ -37,6 +37,7 @@ class RedisStream(Spout):
             streaming \
                 --output_kafka_topic redis_stream_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
+            none \
             listen \
                 --args stream_key=my_stream host=localhost port=6379 db=0
         ```
@@ -107,7 +108,9 @@ class RedisStream(Spout):
                 try:
                     # Use run_in_executor to run the synchronous redis call in a separate thread
                     result = await asyncio.get_event_loop().run_in_executor(
-                        None, self.redis.xread, {stream_key: last_id, "count": 10, "block": 1000}
+                        None,
+                        self.redis.xread,
+                        {stream_key: last_id, "count": 10, "block": 1000},
                     )
 
                     for _, messages in result:

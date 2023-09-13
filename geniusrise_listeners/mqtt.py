@@ -37,6 +37,7 @@ class MQTT(Spout):
             streaming \
                 --output_kafka_topic mqtt_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
+            none \
             listen \
                 --args host=localhost port=1883 topic=my_topic
         ```

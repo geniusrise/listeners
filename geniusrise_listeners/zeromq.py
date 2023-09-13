@@ -36,6 +36,7 @@ class ZeroMQ(Spout):
             streaming \
                 --output_kafka_topic zmq_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
+            none \
             listen \
                 --args endpoint=tcp://localhost:5555 topic=my_topic syntax=json
         ```

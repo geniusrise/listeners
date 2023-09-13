@@ -35,6 +35,7 @@ class Udp(Spout):
             streaming \
                 --output_kafka_topic udp_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
+            none \
             listen \
                 --args host=localhost port=12345
         ```

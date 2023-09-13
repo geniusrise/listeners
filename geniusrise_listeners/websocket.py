@@ -36,6 +36,7 @@ class Websocket(Spout):
             streaming \
                 --output_kafka_topic websocket_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
+            none \
             listen \
                 --args host=localhost port=8765
         ```

@@ -36,6 +36,7 @@ class Kinesis(Spout):
             streaming \
                 --output_kafka_topic kinesis_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
+            none \
             listen \
                 --args stream_name=my_stream shard_id=shardId-000000000000
         ```

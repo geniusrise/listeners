@@ -50,6 +50,7 @@ class Quic(Spout):
             streaming \
                 --output_kafka_topic quic_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
+            none \
             listen \
                 --args cert_path=/path/to/cert.pem key_path=/path/to/key.pem host=localhost port=4433
         ```

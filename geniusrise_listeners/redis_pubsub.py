@@ -37,6 +37,7 @@ class RedisPubSub(Spout):
             streaming \
                 --output_kafka_topic redis_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
+            none \
             listen \
                 --args channel=my_channel host=localhost port=6379 db=0
         ```

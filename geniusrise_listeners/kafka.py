@@ -37,6 +37,7 @@ class Kafka(Spout):
             streaming \
                 --output_kafka_topic kafka_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
+            none \
             listen \
                 --args topic=my_topic group_id=my_group
         ```

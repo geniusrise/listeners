@@ -37,6 +37,7 @@ class Grpc(Spout):
             streaming \
                 --output_kafka_topic grpc_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
+            none \
             listen \
                 --args server_address=localhost:50051 request_data=my_request syntax=proto3
         ```

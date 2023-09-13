@@ -35,6 +35,7 @@ class ActiveMQ(Spout):
             streaming \
                 --output_kafka_topic activemq_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
+            none \
             listen \
                 --args host=localhost port=61613 destination=my_queue
         ```

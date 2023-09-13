@@ -37,6 +37,7 @@ class Webhook(Spout):
             streaming \
                 --output_kafka_topic webhook_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
+            none \
             listen \
                 --args endpoint=* port=3000
         ```

@@ -34,6 +34,7 @@ class SQS(Spout):
             streaming \
                 --output_kafka_topic sqs_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
+            none \
             listen \
                 --args queue_url=https://sqs.us-east-1.amazonaws.com/123456789012/my-queue batch_size=10 batch_interval=10
         ```

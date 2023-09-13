@@ -35,6 +35,7 @@ class SocketIo(Spout):
             streaming \
                 --output_kafka_topic socketio_test \
                 --output_kafka_cluster_connection_string localhost:9094 \
+            none \
             listen \
                 --args url=http://localhost:3000 namespace=/chat
         ```
