@@ -32,8 +32,9 @@ env-file==2020.12.3
 exceptiongroup==1.1.2
 flake8==6.1.0
 Flask==2.3.2
-geniusrise==0.0.3
+geniusrise==0.0.12
 google-auth==2.17.3
+GPUtil==1.4.0
 idna==3.4
 importlib-metadata==6.8.0
 inflect==7.0.0
