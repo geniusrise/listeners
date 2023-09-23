@@ -33,8 +33,8 @@ This is a collection of generic streaming listeners (Spouts).
 
 Includes:
 
-| No. | Name                                               | Description                                           | Output Type | Input Type    |
-| --- | -------------------------------------------------- | ----------------------------------------------------- | ----------- | ------------- |
+| No. | Name                                        | Description                                           | Output Type | Input Type    |
+| --- | ------------------------------------------- | ----------------------------------------------------- | ----------- | ------------- |
 | 1   | [Webhook](listeners/webhook.py)             | Cherrypy server that accepts all HTTP API calls       | Streaming   | HTTP          |
 | 2   | [Kafka](listeners/kafka.py)                 | Kafka client that listens to a topic                  | Streaming   | Kafka         |
 | 3   | [Websocket](listeners/websocket.py)         | Websocket server that listens to a socket             | Streaming   | Websocket     |
