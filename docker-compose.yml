@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   redis:
@@ -11,7 +11,7 @@ services:
   rabbitmq:
     image: rabbitmq:management
     ports:
-      - "15672:15672"  # Management UI
+      - "15672:15672" # Management UI
       - "5672:5672"
     environment:
       - RABBITMQ_DEFAULT_USER=admin
@@ -32,14 +32,14 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
 
   zookeeper:
-    image: 'bitnami/zookeeper:latest'
+    image: "bitnami/zookeeper:latest"
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
     ports:
-      - '2182:2181'
+      - "2182:2181"
 
   kafka:
-    image: 'bitnami/kafka:latest'
+    image: "bitnami/kafka:latest"
     environment:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
@@ -47,16 +47,16 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
     ports:
-      - '9095:9092'
-      - '9096:9093'
-      - '9097:9094'
+      - "9095:9092"
+      - "9096:9093"
+      - "9097:9094"
     depends_on:
       - zookeeper
 
   kafka-ui:
-    image: 'provectuslabs/kafka-ui:latest'
+    image: "provectuslabs/kafka-ui:latest"
     ports:
-      - '8088:8080'
+      - "8088:8080"
     environment:
       - KAFKA_CLUSTERS_0_NAME="geniusrise-spout-test"
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
@@ -70,13 +70,13 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: geniusrise
     ports:
-      - '5433:5432'
+      - "5433:5432"
 
   mosquitto:
     image: eclipse-mosquitto:latest
     ports:
-      - "1883:1883"  # MQTT
-      - "9001:9001"  # Websockets
+      - "1883:1883" # MQTT
+      - "9001:9001" # Websockets
     volumes:
       - mosquitto-data:/mosquitto/data
       - mosquitto-log:/mosquitto/log

@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import socketio
+import json
 from typing import Optional
 from geniusrise import Spout, State, StreamingOutput
 
@@ -60,6 +61,14 @@ class SocketIo(Spout):
         super().__init__(output, state)
         self.top_level_arguments = kwargs
         self.sio = socketio.Client()
+
+    def _message_handler(self, msg):
+        if type(msg) is str:
+            self.output.save(json.loads(msg))
+        elif type(msg) is dict:
+            self.output.save(msg)
+        else:
+            raise ValueError(f"Message received could not be parsed: {msg}")
 
     def listen(
         self,
