@@ -36,18 +36,6 @@ def mock_cherrypy_engine():
         yield mock_engine
 
 
-@pytest.fixture
-def mock_cherrypy_config():
-    with mock.patch("cherrypy.config.update") as mock_config:
-        yield mock_config
-
-
-@pytest.fixture
-def mock_cherrypy_mount():
-    with mock.patch("cherrypy.tree.mount") as mock_mount:
-        yield mock_mount
-
-
 def test_webhook_initialization(mock_output, mock_state):
     # Testing initialization
     webhook = Webhook(mock_output, mock_state)
