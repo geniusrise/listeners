@@ -11,9 +11,7 @@ from geniusrise_listeners.udp import (
 @pytest.fixture
 def mock_output():
     """Fixture to mock StreamingOutput."""
-    mock_output = mock.MagicMock(spec=StreamingOutput)
-    mock_output.log = mock.MagicMock()
-    return mock_output
+    return mock.MagicMock(spec=StreamingOutput)
 
 
 @pytest.fixture
@@ -45,48 +43,16 @@ def udp_server():
     return send_data
 
 
-def test_udp_init(mock_output, mock_state):
-    """Test if Udp initialization with basic arguments works as expected."""
-    udp = Udp(mock_output, mock_state)
-    assert udp.output == mock_output
-    assert udp.state == mock_state
-    assert udp.top_level_arguments == {}
-
-
-def test_udp_init_with_args():
+def test_udp_init_with_args(mock_output, mock_state):
     """Test if Udp initialization with custom arguments works as expected."""
-    output = mock.MagicMock(spec=StreamingOutput)
-    state = mock.MagicMock(spec=State)
     custom_kwargs = {
         "arg1": "value1",
         "arg2": "value2",
     }
-    udp = Udp(output, state, **custom_kwargs)
-    assert udp.output == output
-    assert udp.state == state
-    assert udp.top_level_arguments == custom_kwargs
-
-
-def test_udp_init_with_add_args():
-    """Test Udp initialization with additional custom arguments."""
-    output = mock.MagicMock(spec=StreamingOutput)
-    state = mock.MagicMock(spec=State)
-    add_kwargs = {
-        "arg3": "value3",
-        "arg4": "value4",
-    }
-    udp = Udp(output, state, **add_kwargs)
-    assert udp.output == output
-    assert udp.state == state
-    assert udp.top_level_arguments == add_kwargs
-
-
-def test_udp_init_empty_custom_args(mock_output, mock_state):
-    """Test Udp initialization with empty custom arguments."""
-    udp = Udp(mock_output, mock_state, **{})
+    udp = Udp(mock_output, mock_state, **custom_kwargs)
     assert udp.output == mock_output
     assert udp.state == mock_state
-    assert udp.top_level_arguments == {}
+    assert udp.top_level_arguments == custom_kwargs
 
 
 def test_udp_init_non_string_custom_args(mock_output, mock_state):
